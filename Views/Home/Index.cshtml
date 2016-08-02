@@ -1,0 +1,214 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+<div id="MainWrap" ng-controller="crudcontroller">
+    <div ng-show="detailsView">
+        <h2>Student List</h2><br />
+        <div>
+            <button ng-click="AddDiv()" type="button" class="btn btn-info">Add New</button><br />
+        </div><br />
+        <table class="table table-hover">
+            <tr>
+                <td><b>First Name</b></td>
+                <td><b>Last Name</b></td>
+                <td><b>Gender</b></td>
+                <td><b>Country</b></td>
+                <td><b>State</b></td>
+                <td><b>City</b></td>
+                <td><b>Email</b></td>
+                <td><b>BirthDate</b></td>
+                <td><b>Courses</b></td>
+                <td><b>Actions</b></td>
+
+            </tr>
+            <tr ng-repeat="student in Students">
+                <td>
+                    {{student.FirstName}}
+                </td>
+                <td>
+                    {{student.LastName}}
+                </td>
+                <td>
+                    {{student.GenderName}}
+                </td>
+                <td>
+                    {{student.CountryName}}
+                </td>
+                <td>
+                    {{student.StateName}}
+                </td>
+                <td>
+                    {{student.CityName}}
+                </td>
+                <td>
+                    {{student.EmailId}}
+                </td>
+                <td>
+                    {{student.BirthDate | date:'dd/MM/yyyy' }}
+                </td>
+                <td>
+                    <span ng-repeat="course in student.Courses">
+                        {{course.CourseName}}<span>,</span>
+                    </span>
+                </td>
+                <td style="width:200px;">
+                    <button type="button" class="btn btn-success btn-md" id="btnAddUpdate" ng-click="EditDiv(student);">Edit</button>
+                    <button type="button" class="btn btn-danger btn-md" ng-click="get(student);">Delete</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div ng-show="AddView">
+        <div><h2>Add Student</h2></div>
+        <div style="margin:30px;">
+            <form class="form-horizontal" id="myForm">
+                <div>
+                    <ul>
+                        <li id="errorMessages" class="text-danger" data-ng-repeat="error in errors">{{error}}</li>
+                    </ul>
+                </div>
+                <div class="form-group">
+                    <input class="form-control" readonly="readonly" name="Student.StudentId" data-ng-model="StudentId" type="hidden" placeholder="Student Id" required />
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> FirstName</label>
+                    <input class="form-control" name="FirstName" data-ng-model="Student.FirstName" type="text" placeholder="First Name" required />
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> LastName</label>
+                    <input class="form-control" name="LastName" data-ng-model="Student.LastName" type="text" placeholder="Last Name" required />
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> Gender</label>
+                    <div style="margin:auto">
+                        <input class="radio-inline" type="radio" name="Gender" value="1" data-ng-model="Student.GenderId" />Male
+                        <input class="radio-inline" type="radio" name="Gender" value="2" data-ng-model="Student.GenderId" />Feale
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> Country</label>
+                    <select class="form-control" id="Country" ng-model="Student.CountryId" data-ng-options="c.CountryId as c.CountryName for c in countries" ng-change="GetStates()">
+                        <option selected="selected" value="">-- Select Country --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> State</label>
+                    <select class="form-control" id="State" ng-disabled="!states" data-ng-model="Student.StateId" ng-options="s.StateId as s.StateName for s in states" ng-change="GetCities()">
+                        <option selected="selected" value="">-- Select State --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> City</label>
+                    <select class="form-control" id="City" data-ng-model="Student.CityId" ng-options="t.CityId as t.CityName for t in cities" ng-disabled="!cities">
+                        <option selected="selected" value="">-- Select city --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> Email</label>
+                    <input class="form-control" name="Email" data-ng-model="Student.EmailId" type="email" placeholder="Email" required />
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> Password</label>
+                    <input class="form-control" name="Password" data-ng-model="Student.Password" type="password" placeholder="Password" required />
+                </div>
+                @*<div class="form-group">
+                    <label class="text-info"> BirthDate</label>
+                    <input class="form-control" name="BirthDate" data-ng-model="Student.BirthDate" type="text" placeholder="BirthDate" required />
+                </div>*@
+                <div class="form-group">
+                    <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="Student.BirthDate" is-open="dpOpenStatus.Student.BirthDate" ng-focus="dpOpenStatus.Student.BirthDate=true" max-date='maxDate' min-date='minDate' ng-required />
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="setDpOpenStatus('Student.BirthDate', $event)">
+                            <i class="glyphicon glyphicon-calendar"></i>
+                        </button>
+                    </span>
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> Courses</label>
+                    <label class="checkbox-inline" ng-repeat="course in courses">
+                        <input type="checkbox" value="{{course.CourseId}}" ng-model="course.IsSelected" /> {{course.CourseName}}<br />
+                    </label>
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn btn-success btn-md" id="btnAddUpdate" ng-click="Add(Student);">Add</button>
+                    <button type="button" class="btn btn-default btn-md" ng-click="Cancel();">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div ng-show="EditView">
+        <div><h2>Edit Student</h2></div>
+        <div style="margin:30px;">
+            <form class="form-horizontal" id="myForm">
+                <div class="form-group">
+                    <input class="form-control" readonly="readonly" name="Student.StudentId" data-ng-model="StudentId" type="hidden" placeholder="Student Id" required />
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> FirstName</label>
+                    <input class="form-control" name="FirstName" data-ng-model="Student.FirstName" type="text" placeholder="First Name" required />
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> LastName</label>
+                    <input class="form-control" name="LastName" data-ng-model="Student.LastName" type="text" placeholder="Last Name" required />
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> Gender</label>
+                    <div style="margin:auto">
+                        <input class="radio-inline" type="radio" name="Gender" value="1" data-ng-model="Student.GenderId" />Male
+                        <input class="radio-inline" type="radio" name="Gender" value="2" data-ng-model="Student.GenderId" />Feale
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> Country</label>
+                    <select class="form-control" id="Country" ng-model="Student.CountryId" data-ng-options="c.CountryId as c.CountryName for c in countries" ng-change="GetStates()">
+                        <option selected="selected" value="">-- Select Country --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> State</label>
+                    <select class="form-control" id="State" ng-disabled="!states" data-ng-model="Student.StateId" ng-options="s.StateId as s.StateName for s in states" ng-change="GetCities()">
+                        <option selected="selected" value="">-- Select State --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> City</label>
+                    <select class="form-control" id="City" data-ng-model="Student.CityId" ng-options="t.CityId as t.CityName for t in cities" ng-disabled="!cities">
+                        <option selected="selected" value="">-- Select city --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> Email</label>
+                    <input class="form-control" name="Email" data-ng-model="Student.EmailId" type="email" placeholder="Email" required />
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> Password</label>
+                    <input class="form-control" name="Password" data-ng-model="Student.Password" type="password" placeholder="Password" required />
+                </div>
+                @*<div class="form-group">
+                    <label class="text-info"> BirthDate</label>
+                    <input class="form-control" name="BirthDate" data-ng-model="Student.BirthDate" type="text" placeholder="BirthDate" required />
+                </div>*@
+                <div class="form-group">
+                    <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="Student.BirthDate" is-open="dpOpenStatus.Student.BirthDate" ng-focus="dpOpenStatus.Student.BirthDate=true" max-date='maxDate' min-date='minDate' ng-required />
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="setDpOpenStatus('Student.BirthDate', $event)">
+                            <i class="glyphicon glyphicon-calendar"></i>
+                        </button>
+                    </span>
+                </div>
+                <div class="form-group">
+                    <label class="text-info"> Courses</label>
+                    <label class="checkbox-inline" ng-repeat="course in courses">
+                        <input type="checkbox" value="{{course.CourseId}}" ng-model="course.IsSelected" /> {{course.CourseName}}<br />
+                    </label>
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn btn-success btn-md" id="btnAddUpdate" ng-click="Update();">Update</button>
+                    <button type="button" class="btn btn-default btn-md" ng-click="Cancel();">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
